@@ -1,0 +1,32 @@
+{
+  "name": "shoeapp.js",
+  "version": "1.0.0",
+  "description": "Searching shoes using the bot made from MS bot framework",
+  "main": "shoeapp.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tirumalesh12/NodeMSbot.git"
+  },
+  "keywords": [
+    "bot"
+  ],
+  "author": "Tirumalesh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Tirumalesh12/NodeMSbot/issues"
+  },
+  "homepage": "https://github.com/Tirumalesh12/NodeMSbot#readme",
+  "dependencies": {
+    "botbuilder": "^3.5.1",
+    "restify": "^4.3.0"
+  },
+  "engines": {
+    "node": "6.9.1"
+  },
+  "devDependencies": {},
+  
+}
