@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Tirumalesh12/NodeMSbot.git"
+    "url": "git+https://github.com/Tirumalesh12/ShoeMSbot.git"
   },
   "keywords": [
     "bot"
@@ -17,16 +17,17 @@
   "author": "Tirumalesh",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Tirumalesh12/NodeMSbot/issues"
+    "url": "https://github.com/Tirumalesh12/ShoeMSbot/issues"
   },
-  "homepage": "https://github.com/Tirumalesh12/NodeMSbot#readme",
+  "homepage": "https://github.com/Tirumalesh12/ShoeMSbot#readme",
   "dependencies": {
-    "botbuilder": "^3.5.1",
+    "botbuilder": "^3.5.3",
+    "client-sessions": "^0.7.0",
+    "https": "^1.0.0",
     "restify": "^4.3.0"
   },
   "engines": {
     "node": "6.9.1"
   },
-  "devDependencies": {},
-  
+  "devDependencies": {}
 }

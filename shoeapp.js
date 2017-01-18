@@ -1,5 +1,8 @@
 var restify = require('restify');
 var builder = require('botbuilder');
+var session = require('client-sessions');
+
+var search = session.search;
 
 // Create bot and add dialogs
 var bot = new builder.BotConnectorBot({ appId: 'aae0da7b-0f18-40ec-aab4-0646b6500a24', appSecret: 'EeaYHcv2OWrhDcn87pedTCR' });
@@ -18,15 +21,15 @@ dialog.matches('ShoeSearch', function (session, args, next) {
 	 var type = builder.EntityRecognizer.findEntity(args.entities, 'Shoe::Shoe_type');
 	 var size = builder.EntityRecognizer.findEntity(args.entities, 'Shoe::Shoe_size');
 	 
-	 var sessionsearch = session.dialogData.search = {
-		 shoe: shoe ? shoe.entity : null,
-		 gender: gender ? gender.entity : null,
-		 brand: brand ? brand.entity : null,
-		 color: color ? color.entity : null,
-		 type: type ? type.entity : null,
-		 size: size ? size.entity : null
+	 search = {
+		 shoe: shoe ? shoe.entity : "",
+		 gender: gender ? gender.entity : "",
+		 brand: brand ? brand.entity : "",
+		 color: color ? color.entity : "",
+		 type: type ? type.entity : "",
+		 size: size ? size.entity : ""
 	 }
-	session.send('Hello there! I am the shoe search bot. You are looking for %s %s %s %s for %s of size %s',brand.entity,type.entity,color.entity,shoe.entity,gender.entity,size.entity);		
+	session.send('Hello there! I am the shoe search bot. You are looking for %s %s %s %s for %s of size %s',search.brand,search.type,search.color,search.shoe,search.gender,search.size);		
 });
 
 // Handling unrecognized conversations.
