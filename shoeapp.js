@@ -2,7 +2,53 @@ var restify = require('restify');
 var builder = require('botbuilder');
 var session = require('client-sessions');
 
+var category = ""; 
+var data = "";
+choose_cat = function(gender, type){
+	if (gender == "Women" && type == "Atheletic"){
+		    category = "5438_1045804_1045806_1228540"
+        }else if (gender == "Women" && type == "Casual"){
+            category = "5438_1045804_1045806_1228545"
+        }else if (gender == "Women" && type == "Formal"){
+            category = "5438_1045804_1045806_1228546"
+        }else if (gender == "Women" && type == ""){
+            category = "5438_1045804_1045806"
+        }else if (gender == "Men" && type == "Atheletic"){
+            category = "5438_1045804_1045807_1228548"
+        }else if (gender == "Men" && type == "Casual"){
+            category = "5438_1045804_1045807_1228552"
+        }else if (gender == "Men" && type == "Formal"){
+            category = "5438_1045804_1045807_1228553"
+        }else if (gender == "Men" && type == ""){
+            category = "5438_1045804_1045807"
+        }else{
+		    category = "5438_1045804"}
+	return category;
+}
+
+callingApi = function(path1){
+	var options = {
+       host: 'api.walmartlabs.com',
+       path: path1, 
+       method: 'GET'   
+    };
+    //this is the call
+    var request = http.get(options, function(res){
+       var body = "";
+       res.on('data', function(data1) {
+          body += data1;
+       });
+       res.on('end', function() {
+          search.data = JSON.parse(body);
+       })
+       res.on('error', function(e) {
+          console.log("Got error: " + e.message);
+       });
+	 }).end();
+}
+
 var search = session.search;
+
 
 // Create bot and add dialogs
 var bot = new builder.BotConnectorBot({ appId: 'aae0da7b-0f18-40ec-aab4-0646b6500a24', appSecret: 'EeaYHcv2OWrhDcn87pedTCR' });
@@ -20,14 +66,15 @@ dialog.matches('ShoeSearch', function (session, args, next) {
 	 var color = builder.EntityRecognizer.findEntity(args.entities, 'Color');
 	 var type = builder.EntityRecognizer.findEntity(args.entities, 'Shoe::Shoe_type');
 	 var size = builder.EntityRecognizer.findEntity(args.entities, 'Shoe::Shoe_size');
-	 
 	 search = {
 		 shoe: shoe ? shoe.entity : "",
 		 gender: gender ? gender.entity : "",
 		 brand: brand ? brand.entity : "",
 		 color: color ? color.entity : "",
 		 type: type ? type.entity : "",
-		 size: size ? size.entity : ""
+		 size: size ? size.entity : "",
+		 data: data ? data : "",
+		 category: category ? category : choose_cat(gender,type)
 	 }
 	session.send('Hello there! I am the shoe search bot. You are looking for %s %s %s %s for %s of size %s',search.brand,search.type,search.color,search.shoe,search.gender,search.size);		
 });
@@ -37,6 +84,8 @@ dialog.matches('None', function (session, args) {
 	console.log ('in none intent');	
 	session.send("I am sorry! I am a bot, perhaps not programmed to understand this command");			
 });
+
+
 
 // Setup Restify Server
 var server = restify.createServer();
