@@ -26,27 +26,6 @@ choose_cat = function(gender, type){
 	return category;
 }
 
-callingApi = function(path1){
-	var options = {
-       host: 'api.walmartlabs.com',
-       path: path1, 
-       method: 'GET'   
-    };
-    //this is the call
-    var request = http.get(options, function(res){
-       var body = "";
-       res.on('data', function(data1) {
-          body += data1;
-       });
-       res.on('end', function() {
-          search.data = JSON.parse(body);
-       })
-       res.on('error', function(e) {
-          console.log("Got error: " + e.message);
-       });
-	 }).end();
-}
-
 var search = session.search;
 
 
@@ -76,6 +55,27 @@ dialog.matches('ShoeSearch', function (session, args, next) {
 		 data: data ? data : "",
 		 category: category ? category : choose_cat(gender,type)
 	 }
+	 callingApi = function(path1){
+	     var options = {
+            host: 'api.walmartlabs.com',
+            path: path1, 
+            method: 'GET'   
+         };
+         //this is the call
+         var request = http.get(options, function(res){
+            var body = "";
+            res.on('data', function(data1) {
+               body += data1;
+            });
+            res.on('end', function() {
+               search.data = JSON.parse(body);
+            })
+            res.on('error', function(e) {
+               console.log("Got error: " + e.message);
+            });
+	      }).end();
+     }
+	 
 	session.send('Hello there! I am the shoe search bot. You are looking for %s %s %s %s for %s of size %s',search.brand,search.type,search.color,search.shoe,search.gender,search.size);		
 });
 
