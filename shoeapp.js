@@ -5,7 +5,9 @@ var session = require('client-sessions');
 var category = ""; 
 var data = "";
 choose_cat = function(gender, type){
-	if (gender == "Women" && type == "Atheletic"){
+	console.log(gender);
+	console.log(type);
+	    if (gender == "Women" && type == "Atheletic"){
 		    category = "5438_1045804_1045806_1228540"
         }else if (gender == "Women" && type == "Casual"){
             category = "5438_1045804_1045806_1228545"
@@ -24,6 +26,13 @@ choose_cat = function(gender, type){
         }else{
 		    category = "5438_1045804"}
 	return category;
+}
+
+capitalize = function(str) {
+	if (str != null && str.length > 0 && (str.charAt(str.length-1)=='s')||(str.charAt(str.length-1)=='S')){
+	str = str.substring(0, str.length-1);
+	}
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
 var search = session.search;
@@ -45,6 +54,9 @@ dialog.matches('ShoeSearch', function (session, args, next) {
 	 var color = builder.EntityRecognizer.findEntity(args.entities, 'Color');
 	 var type = builder.EntityRecognizer.findEntity(args.entities, 'Shoe::Shoe_type');
 	 var size = builder.EntityRecognizer.findEntity(args.entities, 'Shoe::Shoe_size');
+	 gender.entity = capitalize(gender.entity);
+	 color.entity = capitalize(color.entity);
+	 type.entity = capitalize(type.entity);
 	 search = {
 		 shoe: shoe ? shoe.entity : "",
 		 gender: gender ? gender.entity : "",
@@ -53,7 +65,7 @@ dialog.matches('ShoeSearch', function (session, args, next) {
 		 type: type ? type.entity : "",
 		 size: size ? size.entity : "",
 		 data: data ? data : "",
-		 category: category ? category : choose_cat(gender,type)
+		 category: category ? choose_cat(gender.entity,type.entity) : choose_cat(gender.entity,type.entity)
 	 }
 	 callingApi = function(path1){
 	     var options = {
@@ -75,7 +87,7 @@ dialog.matches('ShoeSearch', function (session, args, next) {
             });
 	      }).end();
      }
-	 
+	session.send(search.category);
 	session.send('Hello there! I am the shoe search bot. You are looking for %s %s %s %s for %s of size %s',search.brand,search.type,search.color,search.shoe,search.gender,search.size);		
 });
 
