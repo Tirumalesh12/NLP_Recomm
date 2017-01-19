@@ -32,7 +32,8 @@ capitalize = function(str) {
 	if (str != null && str.length > 0 && (str.charAt(str.length-1)=='s')||(str.charAt(str.length-1)=='S')){
 	str = str.substring(0, str.length-1);
 	}
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    str = str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+	return str;
 }
 
 var search = session.search;
@@ -54,19 +55,18 @@ dialog.matches('ShoeSearch', function (session, args, next) {
 	 var color = builder.EntityRecognizer.findEntity(args.entities, 'Color');
 	 var type = builder.EntityRecognizer.findEntity(args.entities, 'Shoe::Shoe_type');
 	 var size = builder.EntityRecognizer.findEntity(args.entities, 'Shoe::Shoe_size');
-	 gender.entity = capitalize(gender.entity);
-	 color.entity = capitalize(color.entity);
-	 type.entity = capitalize(type.entity);
 	 search = {
 		 shoe: shoe ? shoe.entity : "",
-		 gender: gender ? gender.entity : "",
+		 gender: gender ? capitalize(gender.entity) : "",
 		 brand: brand ? brand.entity : "",
-		 color: color ? color.entity : "",
-		 type: type ? type.entity : "",
+		 color: color ? capitalize(color.entity) : "",
+		 type: type ? capitalize(type.entity) : "",
 		 size: size ? size.entity : "",
 		 data: data ? data : "",
-		 category: category ? choose_cat(gender.entity,type.entity) : choose_cat(gender.entity,type.entity)
-	 }
+		 category: ""
+		 }
+	 search.category = category ? choose_cat(search.gender,search.type) : choose_cat(search.gender,search.type);
+	 
 	 callingApi = function(path1){
 	     var options = {
             host: 'api.walmartlabs.com',
