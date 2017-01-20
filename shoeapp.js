@@ -86,7 +86,7 @@ dialog.matches('ShoeSearch', function (session, args, next) {
 		data: "",
 		category: ""
 		}
-	search.category = category ? choose_cat(search.gender,search.type) : choose_cat(search.gender,search.type);
+	search.category = choose_cat(search.gender,search.type);
 	session.send(search.category);
 	session.send('Hello there! I am the shoe search bot. You are looking for %s %s %s %s for %s of size %s',search.brand,search.type,search.color,search.shoe,search.gender,search.size);		
     var path = "/v1/search?apiKey=ve94zk6wmtmkawhde7kvw9b3&query=shoes&categoryId="+search.category+ "&facet=on&facet.filter=gender:" + search.gender +"&facet.filter=color:" + search.color + "&facet.filter=brand:" + search.brand + "&facet.filter=shoe_size:"+search.size+"&format=json&start=1&numItems=10";
