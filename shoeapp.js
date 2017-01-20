@@ -5,26 +5,6 @@ var https = require('https');
 
 var data = "";
 
- callingApi = function(path1,callback){
-	     var options = {
-            host: 'api.walmartlabs.com',
-            path: path1, 
-            method: 'GET'   
-         };
-         //this is the call
-         var request = https.get(options, function(res){
-            var body = "";
-            res.on('data', function(data1) {
-               body += data1;
-            });
-            res.on('end', function() {
-               callback(JSON.parse(body));
-            })
-            res.on('error', function(e) {
-               console.log("Got error: " + e.message);
-            });
-	      }).end();
-     }
 choose_cat = function(gender, type){
 	console.log(gender);
 	console.log(type);
@@ -87,10 +67,29 @@ dialog.matches('ShoeSearch', function (session, args, next) {
 		category: ""
 		}
 	search.category = choose_cat(search.gender,search.type);
-	session.send(search);
 	session.send('Hello there! I am the shoe search bot. You are looking for %s %s %s %s for %s of size %s',search.brand,search.type,search.color,search.shoe,search.gender,search.size);		
-    var path = "/v1/search?apiKey=ve94zk6wmtmkawhde7kvw9b3&query=shoes&categoryId="+ search.category +"&facet=on&facet.filter=gender:"+ search.gender +"&facet.filter=color:"+ search.color +"&facet.filter=brand:"+ search.brand +"&facet.filter=shoe_size:"+ search.size +"&format=json&start=1&numItems=10";
-    callingApi(function(path, data){
+    
+	 callingApi = function(callback){
+	     var options = {
+            host: 'api.walmartlabs.com',
+            path: "/v1/search?apiKey=ve94zk6wmtmkawhde7kvw9b3&query=shoes&categoryId="+ search.category +"&facet=on&facet.filter=gender:"+ search.gender +"&facet.filter=color:"+ search.color +"&facet.filter=brand:"+ search.brand +"&facet.filter=shoe_size:"+ search.size +"&format=json&start=1&numItems=10", 
+            method: 'GET'   
+         };
+         //this is the call
+         var request = https.get(options, function(res){
+            var body = "";
+            res.on('data', function(data1) {
+               body += data1;
+            });
+            res.on('end', function() {
+               callback(JSON.parse(body));
+            })
+            res.on('error', function(e) {
+               console.log("Got error: " + e.message);
+            });
+	      }).end();
+     }
+    callingApi(function(data){
 	console.log(data);
 	});
 });
