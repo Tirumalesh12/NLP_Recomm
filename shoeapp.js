@@ -79,7 +79,7 @@ dialog.matches('ShoeSearch', function (session, args, next) {
 	search = {
 		shoe: shoe ? shoe.entity : "",
 		gender: gender ? capitalize(gender.entity) : "",
-		brand: brand ? brand.entity : "",
+		brand: brand ? capitalize(brand.entity) : "",
 		color: color ? capitalize(color.entity) : "",
 		type: type ? capitalize(type.entity) : "",
 		size: size ? size.entity : "",
@@ -87,9 +87,9 @@ dialog.matches('ShoeSearch', function (session, args, next) {
 		category: ""
 		}
 	search.category = choose_cat(search.gender,search.type);
-	session.send(search.category);
+	session.send(search);
 	session.send('Hello there! I am the shoe search bot. You are looking for %s %s %s %s for %s of size %s',search.brand,search.type,search.color,search.shoe,search.gender,search.size);		
-    var path = "/v1/search?apiKey=ve94zk6wmtmkawhde7kvw9b3&query=shoes&categoryId="+search.category+ "&facet=on&facet.filter=gender:" + search.gender +"&facet.filter=color:" + search.color + "&facet.filter=brand:" + search.brand + "&facet.filter=shoe_size:"+search.size+"&format=json&start=1&numItems=10";
+    var path = "/v1/search?apiKey=ve94zk6wmtmkawhde7kvw9b3&query=shoes&categoryId="+ search.category +"&facet=on&facet.filter=gender:"+ search.gender +"&facet.filter=color:"+ search.color +"&facet.filter=brand:"+ search.brand +"&facet.filter=shoe_size:"+ search.size +"&format=json&start=1&numItems=10";
     callingApi(function(path, data){
 	console.log(data);
 	});
