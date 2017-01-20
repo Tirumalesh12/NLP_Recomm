@@ -91,7 +91,7 @@ dialog.matches('ShoeSearch', function (session, args, next) {
      }
     callingApi(function(data){
 	console.log(data);
-	session.send(data.items[0].name);
+	//session.send(data.items[0].name);
 	});
 });
 
