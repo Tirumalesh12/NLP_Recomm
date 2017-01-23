@@ -41,7 +41,7 @@ var search = session.search;
 
 
 // Create bot and add dialogs
-var bot = new builder.BotConnectorBot({ appId: 'aae0da7b-0f18-40ec-aab4-0646b6500a24', appSecret: 'EeaYHcv2OWrhDcn87pedTCR' });
+var bot = new builder.BotConnectorBot({ appId: '17790517-6230-40b8-bcba-e8393ad8a315', appSecret: '5mrw94ZgtcM5a7EgXzJM1yQ' });
 
 var recognizer = new builder.LuisRecognizer('https://api.projectoxford.ai/luis/v2.0/apps/c592677c-d9ec-435d-bada-77008d9fc147?subscription-key=412111898d6f49a0b22467676f123ecb&verbose=true&q=');
 var dialog = new builder.IntentDialog({ recognizers: [recognizer] });
@@ -106,6 +106,6 @@ dialog.matches('None', function (session, args) {
 // Setup Restify Server
 var server = restify.createServer();
 server.post('/api/messages', bot.verifyBotFramework(), bot.listen());
-server.listen(process.env.port || 5001, function () {
+server.listen(process.env.port || 6001, function () {
     console.log('%s listening to %s', server.name, server.url); 
 });
