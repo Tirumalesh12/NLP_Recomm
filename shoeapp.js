@@ -43,12 +43,12 @@ var search = session.search;
 // Create bot and add dialogs
 var bot = new builder.BotConnectorBot({ appId: '17790517-6230-40b8-bcba-e8393ad8a315', appSecret: '5mrw94ZgtcM5a7EgXzJM1yQ' });
 
-var recognizer = new builder.LuisRecognizer('https://api.projectoxford.ai/luis/v2.0/apps/c592677c-d9ec-435d-bada-77008d9fc147?subscription-key=412111898d6f49a0b22467676f123ecb&verbose=true&q=');
+var recognizer = new builder.LuisRecognizer('https://api.projectoxford.ai/luis/v2.0/apps/ab8bc42f-9e84-4cf5-96e7-c59a54e552b6?subscription-key=412111898d6f49a0b22467676f123ecb&verbose=true&q=');
 var dialog = new builder.IntentDialog({ recognizers: [recognizer] });
 bot.add('/', dialog);
 
 // Handling the Greeting intent. 
-dialog.matches('ShoeSearch', function (session, args, next) {
+dialog.matchesAny(['ShoeSearch','Gender','Type','Color','Brand'] , function (session, args, next) {
 	console.log ('in shoesearch intent ');
 	var shoe = builder.EntityRecognizer.findEntity(args.entities, 'Shoe');
 	var gender = builder.EntityRecognizer.findEntity(args.entities, 'Gender');
@@ -73,7 +73,7 @@ dialog.matches('ShoeSearch', function (session, args, next) {
 	     var options = {
             host: 'api.walmartlabs.com',
             path: "/v1/search?apiKey=ve94zk6wmtmkawhde7kvw9b3&query=shoes&categoryId="+ search.category +"&facet=on&facet.filter=gender:"+ search.gender +"&facet.filter=color:"+ search.color +"&facet.filter=brand:"+ search.brand +"&facet.filter=shoe_size:"+ search.size +"&format=json&start=1&numItems=10", 
-            method: 'GET'   
+            method: 'GET'		
          };
          //this is the call
          var request = https.get(options, function(res){
@@ -90,22 +90,52 @@ dialog.matches('ShoeSearch', function (session, args, next) {
 	      }).end();
      }
     callingApi(function(data){
-	console.log(data);
+	console.log(data.items[0].name);
 	session.send(data.items[0].name);
+	show = function(session) {      
+        var msg = new builder.Message(session)
+            .attachments([
+                new builder.HeroCard(session)
+                    .title(data.items[0].name)
+                    .images([ builder.CardImage.create(session, data.items[0].thumbnailImage) ])
+					.tap(builder.CardAction.openUrl(session, data.items[0].productUrl)),
+                new builder.HeroCard(session)
+                    .title(data.items[1].name)
+                    .images([ builder.CardImage.create(session, data.items[1].thumbnailImage) ])
+					.tap(builder.CardAction.openUrl(session, data.items[1].productUrl)),
+			    new builder.HeroCard(session)
+                    .title(data.items[2].name)
+                    .images([ builder.CardImage.create(session, data.items[2].thumbnailImage) ])
+					.tap(builder.CardAction.openUrl(session, data.items[2].productUrl))
+            ]);
+        session.send(msg);
+	}
+	show(session);
 	});
 });
 
 // Handling unrecognized conversations.
 dialog.matches('None', function (session, args) {
 	console.log ('in none intent');	
-	session.send("I am sorry! I am a bot, perhaps not programmed to understand this command");			
+	session.send("I am sorry! I am a bot, perhaps not programmed to understand this command");	
+	show = function(session) {
+    var msg = new builder.Message(session)
+            .attachments([
+                new builder.HeroCard(session)
+                    .title("Sample")
+                    .images([ builder.CardImage.create(session, "https://docs.botframework.com/en-us/images/builder/builder-luis-create-app.png") ])
+					.tap(builder.CardAction.openUrl(session, ""))
+			]);
+		session.send(msg);
+	}
+	show(session);
 });
-
 
 
 // Setup Restify Server
 var server = restify.createServer();
 server.post('/api/messages', bot.verifyBotFramework(), bot.listen());
-server.listen(process.env.port || 6001, function () {
+server.on('error', function() { console.log("error"); });
+server.listen(process.env.port || 8080, function () {
     console.log('%s listening to %s', server.name, server.url); 
 });
