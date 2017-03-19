@@ -5,6 +5,22 @@ var sess = require('client-sessions')
 sess.maincart = [];
 sess.number = 0;
 
+WishMe = function(){
+	var currentTime = new Date();
+	var currentOffset = currentTime.getTimezoneOffset();
+	var ISTOffset = 330;   // IST offset UTC +5:30 
+	var myDate = new Date(currentTime.getTime() + (ISTOffset + currentOffset)*60000);
+    if (myDate.getHours()>4 && myDate.getHours() < 12 ){ 
+    return "Good Morning!"
+	} else if (myDate.getHours() >= 12 && myDate.getHours() <= 17 ) { 
+	return "Good Afternoon!"; 
+	} else if ( myDate.getHours() > 17 && myDate.getHours() <= 24 ) { 
+	return "Good Evening!";
+	}else {
+		return "I guess it is very late now, Anyway"
+	} 
+};
+
 promptThis = function(session){ 
         if(session.userData.gender==""){
 			builder.Prompts.choice(session, "Please select the gender.",['Men','Women']);
@@ -200,6 +216,27 @@ colorsArray = function(session,data){
 	return colors;
 }
 
+weatherApi = function(place, callback){
+    var options = {
+		host: 'api.openweathermap.org',
+		path: '/data/2.5/weather?q=' +place+ '&appid=13a673ce300c31edc72ac96ecbe062b4',
+		method: 'GET'
+	};
+        //this is the call
+	var request = http.request(options, function(res){
+		var body = "";
+		res.on('data', function(data1) {
+			body += data1;
+		});
+		res.on('end', function() {
+			callback(JSON.parse(body));
+		})
+		res.on('error', function(e) {
+			console.log("Got error: " + e.message);
+		});
+	}).end();
+}
+
 callingApi = function(path, callback){
 	console.log(path);
 	var options = {
@@ -230,47 +267,92 @@ var dialog = new builder.IntentDialog({ recognizers: [recognizer] });
 bot.dialog('/', dialog);
 
 // Handling the Greeting intent. 
-dialog.matches('Ocassion', function (session, args, next) {
-	console.log ('in shoesearch intent ');
-	var ocassion = builder.EntityRecognizer.findEntity(args.entities, 'Ocassion');
-	var place = builder.EntityRecognizer.findEntity(args.entities, 'Country');
-	session.userData = {
-		ocassion: ocassion ? ocassion.entity : "",
-		place: place ? capitalize(place.entity) : "",
-    };
-	if(session.userData.place != ""){ session.userData.ocassion = "vacation"; }
-	if(session.userData.ocassion == "vacation"){
-		if(session.userData.place == ""){
-		session.beginDialog("Ask Place");
-		}else {
-			session.beginDialog("vacation");
-		}
-	} 	
+dialog.matches('Welcome', function (session, args, next) {
+	console.log ('in welcome intent');	
+	var username = session.message;
+	session.send("Hello " +username.address.user.name+ ". " +WishMe());
+	session.send("Can I help you in anything. Feel free to ask");
+	session.userData.ocassion = "";
+	session.endDialog();
 })
 
-// Handling the Brand dialog. 
-bot.dialog('/Ask Place', [
-	function (session, args) {
+dialog.matches('Vacation', function (session, args, next) {
+	console.log ('in ocassion intent ');
+	var vacation = builder.EntityRecognizer.findEntity(args.entities, 'Vacation');
+	var place = builder.EntityRecognizer.findEntity(args.entities, 'Vacation::country'); 
+	session.userData = {
+		vacation: vacation ? vacation.entity : "",
+		place: place ? place.entity : "",
+		ocassion: "vacation"
+    };
+	if(session.userData.vacation == ""){
+	if(session.userData.place != ""){ session.userData.vacation = "vacation"; }}
+	if(session.userData.place == ""){
+		session.beginDialog("/Ask Place");
+	}else {
+			session.send(session.userData.place + " is a beautiful place to go for a " +session.userData.vacation+ ".");
+			session.beginDialog("/RecommendVac");
+	}	
+})
+ 
+bot.dialog('/Ask Place', function (session, args) {
 		console.log("in Ask place dialog");
-		session.send("Where are you going to?")
-	}
-]);
+	    session.send(session.userData.ocassion);
+		session.send("That's nice. Where are you going to?");
+		session.endDialog();
+});
+
+bot.dialog('/Recommend', function (session, args) {
+		console.log("in recommend dialog");
+		session.send("Would you like me to recommend some necessary things you will be needing?")
+		session.endDialog();
+});
+
+bot.dialog('/RecommendVac', function (session, args) {
+		console.log("in recommend dialog");
+		weatherApi(session.userData.place, function(weather){
+			var temp = parseInt(parseInt(weather.main.temp_max)-273);
+			if(temp<=20){
+				session.userData.temp = "cold";
+				session.send(session.userData.place+ " is a very cold place. At this time in the year, there the temperature will be usually near to "+(parseInt(temp/10))*10 +'\xB0C');
+			    session.send("Would you like me to recommend some necessary things you will be needing?")
+		    }else if(temp>=25){
+				session.userData.temp = "hot";
+				session.send(session.userData.place+ " is a hot place. At this time in the year, there the temperature will be usually near to "+((parseInt((temp/10))*10)+10) +'\xB0C');
+			    session.send("Would you like me to recommend some necessary things you will be needing?")
+		    }
+			
+	    });
+		session.endDialog();
+});
 
 
-dialog.matches('Gender', function (session, args) {
-	var gender = builder.EntityRecognizer.findEntity(args.entities, 'Gender');
-	session.userData.gender = gender ? capitalize(gender.entity) : "",
-	session.userData.page = 0;
-	session.userData.path = "/v1/search?apiKey=ve94zk6wmtmkawhde7kvw9b3&query=shoes&categoryId="+ choose_cat(session.userData.gender,session.userData.type) +"&facet=on&facet.filter=gender:"+ session.userData.gender +"&facet.filter=color:"+ session.userData.color +"&facet.filter=brand:"+ session.userData.brand +"&facet.filter=shoe_size:"+ session.userData.size +"&format=json&start=1&numItems=10";
-	callingApi(session.userData.path, function(data){	
-	showoutput(session,data);
-	promptThis(session);
-	if(session.userData.type == ""){
-		     session.endDialog();
-	}else if(session.userData.brand != ""){
+dialog.matches('Yes', function (session, args) {
+	session.beginDialog('/' +session.userData.ocassion);
+})
+
+dialog.matches('No', function (session, args) {
+	session.send('OK, What are you looking for?');
+	session.endDialog();
+})
+
+bot.dialog('/vacation', function (session, args) {
+	if(session.userData.temp == "cold"){
+		session.send("1. Base layer shirt with long-sleeves,");
+		session.send("2. Woollen Socks,"); 
+		session.send("3. Boots,"); 
+		session.send("4. Winter Coat/Jacket,"); 
+		session.send("5. Other accessories like gloves, a scarf and a hat");
+		if(session.userData.vacation == "treking"){session.send("6. Treking shoe");}
+		session.endDialog();
+	}else if(session.userData.temp == "hot"){
+		session.send("1. Sun Glasses,");
+		session.send("2. Light and thin Scarf,"); 
+		session.send("3. Sun Hat,"); 
+		session.send("4. Dress/Running Shoes and Sandals,"); 
+		session.send("5. Other accessories like Sunscreen, Insulated Water Bottle, Light material clothes");
 		session.endDialog();
 	}
-	})
 })
 
 dialog.matches('Type', function (session, args) {
@@ -359,9 +441,8 @@ dialog.matches('Add Cart', function (session, args, results) {
 		addCart(session,data);
 		builder.Prompts.choice(session, "Check your cart",['showcart']);
 		session.endDialog();
-		}
+		})
 	}
-	})
 })
 
 dialog.matches('Show Cart', function (session, args, results) {
@@ -541,36 +622,6 @@ dialog.matches('None', function (session, args) {
     session.endDialog();	
 });
 
-dialog.matches('Buy', [
-    function(session, args){
-		console.log("in buy intent");
-		session.send(" Here is your profile details: \r\n \r\n Name: Mr. Stephane Crozatier \r\n Email: coolstephane@abc.xyz \r\n Contact: 9876543210");
-		builder.Prompts.choice(session, "Continue as Stephane",['Continue','Cancel']);
-	}
-	function(session, args, results){
-		 if (results.response && results.response.entity == 'Continue' ) {
-			 session.send("OK, we found two saved addresses");
-		     builder.Prompts.choice(session, "Please select one address",['Work address','Home address','Cancel']);
-		}else {}
-	}
-	function(session, args, results){
-		 if (results.response && results.response.entity != 'Cancel') {
-			 session.send("OK Stephane, we will ship it to your %s", results.response.entity);
-			 builder.Prompts.choice(session, "select shipping method",["Normal shipping(6-7 days) - normal shipping cost", "Fedex(nextday delivery)- extra $5", "USPS(2-3 days delivery)- extra $3",'Cancel']);
-		 }else {}
-	}
-	function(session, args, results){
-		if (results.response && results.response.entity != 'Cancel') {
-		builder.Prompts.choice(session, "Select card for payment",['VISA 1234','Cancel']);
-		}else {}
-	}
-	function(session, args, results){
-		if (results.response && results.response.entity != 'Cancel') {
-		builder.Prompts.number(session, "Give security number of your card VISA 1234");
-		}else {}
-	}
-	
-])
 
 
 

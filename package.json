@@ -21,8 +21,9 @@
   },
   "homepage": "https://github.com/Tirumalesh12/ShoeMSbot#readme",
   "dependencies": {
-    "botbuilder": "^3.5.3",
+    "botbuilder": "^3.7.0",
     "client-sessions": "^0.7.0",
+    "http": "0.0.0",
     "https": "^1.0.0",
     "restify": "^4.3.0"
   },
