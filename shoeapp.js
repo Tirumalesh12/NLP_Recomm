@@ -302,6 +302,19 @@ bot.dialog('/Ask Place', function (session, args) {
 		session.endDialog();
 });
 
+dialog.matches('Office', function (session, args, next) {
+	console.log ('in ocassion intent ');
+	var office = builder.EntityRecognizer.findEntity(args.entities, 'office');
+	var place = builder.EntityRecognizer.findEntity(args.entities, 'Vacation::country'); 
+	session.userData = {
+		office: office ? office.entity : "",
+		place: place ? place.entity : "",
+		ocassion: "office"
+    };
+	session.send("Then You should look formal in your " +session.userData.office+".");
+	session.beginDialog("/Recommend");
+})
+
 bot.dialog('/Recommend', function (session, args) {
 		console.log("in recommend dialog");
 		session.send("Would you like me to recommend some necessary things you will be needing?")
@@ -354,6 +367,26 @@ bot.dialog('/vacation', function (session, args) {
 		session.endDialog();
 	}
 })
+
+bot.dialog('/office', function (session, args) {
+	if(session.userData.office == "office"||"work"){
+		session.send("1. Base layer shirt with long-sleeves,");
+		session.send("2. Woollen Socks,"); 
+		session.send("3. Boots,"); 
+		session.send("4. Winter Coat/Jacket,"); 
+		session.send("5. Other accessories like gloves, a scarf and a hat");
+		if(session.userData.vacation == "treking"){session.send("6. Treking shoe");}
+		session.endDialog();
+	}else if(session.userData.temp == "hot"){
+		session.send("1. Sun Glasses,");
+		session.send("2. Light and thin Scarf,"); 
+		session.send("3. Sun Hat,"); 
+		session.send("4. Dress/Running Shoes and Sandals,"); 
+		session.send("5. Other accessories like Sunscreen, Insulated Water Bottle, Light material clothes");
+		session.endDialog();
+	}
+})
+
 
 dialog.matches('Type', function (session, args) {
 	var type = builder.EntityRecognizer.findEntity(args.entities, 'Shoe::Shoe_type');
